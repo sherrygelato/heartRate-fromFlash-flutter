@@ -15,7 +15,7 @@ class HomePageView extends State<HomePage> {
   bool _toggled = false;
   bool _processing = false;
   List<SensorValue> _data = [];
-  CameraController _controller;
+  late CameraController _controller;
   double _alpha = 0.3;
   int _bpm = 0;
 
@@ -45,7 +45,7 @@ class HomePageView extends State<HomePage> {
       _controller = CameraController(_cameras.first, ResolutionPreset.low);
       await _controller.initialize();
       Future.delayed(Duration(milliseconds: 500)).then((onValue) {
-        _controller.flash(true);
+        _controller.setFlashMode(FlashMode.auto);
       });
       _controller.startImageStream((CameraImage image) {
         if (!_processing) {
@@ -122,7 +122,7 @@ class HomePageView extends State<HomePage> {
 
   _disposeController() {
     _controller.dispose();
-    _controller = null;
+    _controller;
   }
 
   @override
