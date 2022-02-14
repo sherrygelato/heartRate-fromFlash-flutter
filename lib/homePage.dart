@@ -1,10 +1,11 @@
 import 'package:camera/camera.dart';
-import 'package:camera/src/camera_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:wakelock/wakelock.dart';
 import 'chart.dart';
 
 class HomePage extends StatefulWidget {
+  const HomePage({Key? key}) : super(key: key);
+
   @override
   HomePageView createState() {
     return HomePageView();
@@ -14,10 +15,10 @@ class HomePage extends StatefulWidget {
 class HomePageView extends State<HomePage> {
   bool _toggled = false;
   bool _processing = false;
-  List<SensorValue> _data = [];
-  late CameraController _controller;
-  double _alpha = 0.3;
-  int _bpm = 0;
+  final List<SensorValue> _data = [];
+  CameraController? _controller;
+  final double _alpha = 0.3;
+  final int _bpm = 0;
 
   _toggle() {
     _initController().then((onValue) {
@@ -43,11 +44,11 @@ class HomePageView extends State<HomePage> {
     try {
       List _cameras = await availableCameras();
       _controller = CameraController(_cameras.first, ResolutionPreset.low);
-      await _controller.initialize();
-      Future.delayed(Duration(milliseconds: 500)).then((onValue) {
-        _controller.setFlashMode(FlashMode.auto);
+      await _controller?.initialize();
+      Future.delayed(const Duration(milliseconds: 500)).then((onValue) {
+        _controller?.setFlashMode(FlashMode.auto);
       });
-      _controller.startImageStream((CameraImage image) {
+      _controller?.startImageStream((CameraImage image) {
         if (!_processing) {
           setState(() {
             _processing = true;
@@ -74,10 +75,10 @@ class HomePageView extends State<HomePage> {
       _avg = 0;
       _n = _values.length;
       _m = 0;
-      _values.forEach((SensorValue value) {
+      for (var value in _values) {
         _avg += value.value / _n;
         if (value.value > _m) _m = value.value;
-      });
+      }
       _threshold = (_m + _avg) / 2;
       _bpm = 0;
       _counter = 0;
@@ -113,7 +114,7 @@ class HomePageView extends State<HomePage> {
     setState(() {
       _data.add(SensorValue(DateTime.now(), _avg));
     });
-    Future.delayed(Duration(milliseconds: 1000 ~/ 30)).then((onValue) {
+    Future.delayed(const Duration(milliseconds: 1000 ~/ 30)).then((onValue) {
       setState(() {
         _processing = false;
       });
@@ -121,7 +122,7 @@ class HomePageView extends State<HomePage> {
   }
 
   _disposeController() {
-    _controller.dispose();
+    _controller!.dispose();
     _controller;
   }
 
@@ -145,7 +146,7 @@ class HomePageView extends State<HomePage> {
                     child: Center(
                       child: _controller == null
                           ? Container()
-                          : CameraPreview(_controller),
+                          : CameraPreview(_controller!),
                     ),
                   ),
                   Expanded(
@@ -154,7 +155,7 @@ class HomePageView extends State<HomePage> {
                         (_bpm > 30 && _bpm < 150
                             ? _bpm.round().toString()
                             : "--"),
-                        style: TextStyle(
+                        style: const TextStyle(
                             fontSize: 32, fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -180,8 +181,8 @@ class HomePageView extends State<HomePage> {
             ),
             Expanded(
               child: Container(
-                margin: EdgeInsets.all(12),
-                decoration: BoxDecoration(
+                margin: const EdgeInsets.all(12),
+                decoration: const BoxDecoration(
                     borderRadius: BorderRadius.all(
                       Radius.circular(18),
                     ),
